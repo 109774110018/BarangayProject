@@ -32,10 +32,10 @@ include __DIR__ . '/../includes/admin_sidebar.php';
 <div class="main-content">
   <div class="topbar">
     <div>
-      <h5><i class="bi bi-speedometer2 me-2"></i>Dashboard</h5>
+      <div class="d-flex align-items-center gap-2"><img src="/BarangayProject/Logo.jpg" alt="Logo" style="width:36px;height:36px;border-radius:50%;border:2px solid #E8A800;"><h5 class="mb-0"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h5></div>
       <small>Welcome back, <?= e($admin['full_name']) ?>! — <?= date('l, F j, Y') ?></small>
     </div>
-    <span class="badge bg-success">Admin</span>
+    <span class="badge bg-primary">Admin</span>
   </div>
 
   <div class="p-4">
@@ -49,10 +49,10 @@ include __DIR__ . '/../includes/admin_sidebar.php';
     <div class="row g-3 mb-4">
       <?php
       $cards = [
-        ['Total Records', $stats['total']     ?? 0, 'primary',   'clipboard-data',    '#1B5E20'],
+        ['Total Records', $stats['total']     ?? 0, 'primary',   'clipboard-data',    '#1A3A8F'],
         ['Pending',       $stats['pending']   ?? 0, 'warning',   'hourglass-split',   '#F59E0B'],
-        ['Approved',      $stats['approved']  ?? 0, 'info',      'check-circle',      '#2196F3'],
-        ['Done',          $stats['done']      ?? 0, 'success',   'patch-check',       '#43A047'],
+        ['Approved',      $stats['approved']  ?? 0, 'info',      'check-circle',      '#1E4DB7'],
+        ['Done',          $stats['done']      ?? 0, 'success',   'patch-check',       '#E8A800'],
         ['Requests',      $stats['requests']  ?? 0, 'purple',    'file-earmark-text', '#7B1FA2'],
         ['Complaints',    $stats['complaints']?? 0, 'danger',    'exclamation-octagon','#E53935'],
       ];

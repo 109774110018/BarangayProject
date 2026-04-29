@@ -14,7 +14,7 @@ $initials = implode('', array_map(fn($w) => strtoupper($w[0]),
 ?>
 <div class="sidebar">
   <div class="sidebar-brand">
-    <div class="brand-icon"><i class="bi bi-building"></i></div>
+    <img src="/BarangayProject/Logo.jpg" alt="Barangay Logo" class="brand-logo">
     <h6><?= APP_NAME ?></h6>
     <small>Admin Panel</small>
   </div>
@@ -28,11 +28,12 @@ $initials = implode('', array_map(fn($w) => strtoupper($w[0]),
   </div>
 
   <nav class="sidebar-nav">
-    <?= nav_link('dashboard.php',     'speedometer2',      'Dashboard',       $current) ?>
-    <?= nav_link('manage_records.php','table',             'Manage Records',  $current) ?>
-    <?= nav_link('residents.php',     'people',            'Residents',       $current) ?>
-    <?= nav_link('notifications.php', 'bell',              'Notifications',   $current) ?>
-    <?= nav_link('export_pdf.php',    'file-earmark-pdf',  'Export PDF',      $current) ?>
+    <?= nav_link('dashboard.php',      'speedometer2',      'Dashboard',        $current) ?>
+    <?= nav_link('manage_records.php', 'table',             'Manage Records',   $current) ?>
+    <?= nav_link('trash.php',          'trash',             'Recently Deleted', $current) ?>
+    <?= nav_link('residents.php',      'people',            'Residents',        $current) ?>
+    <?= nav_link('notifications.php',  'bell',              'Notifications',    $current) ?>
+    <?= nav_link('export_pdf.php',     'file-earmark-pdf',  'Export PDF',       $current) ?>
   </nav>
 
   <div class="sidebar-footer">
@@ -51,10 +52,8 @@ $initials = implode('', array_map(fn($w) => strtoupper($w[0]),
       <div style="
           background:#fff; border-radius:12px; padding:28px 32px;
           max-width:360px; width:90%; text-align:center; box-shadow:0 8px 32px rgba(0,0,0,.2);">
-        <div style="font-size:2.5rem; color:#dc3545; margin-bottom:8px;">
-          <i class="bi bi-box-arrow-left"></i>
-        </div>
-        <h5 style="margin:0 0 6px; color:#212529;">Log Out?</h5>
+        <img src="/BarangayProject/Logo.jpg" alt="Logo" style="width:60px;height:60px;border-radius:50%;border:2px solid #E8A800;margin-bottom:12px;">
+        <h5 style="margin:0 0 6px; color:#1A3A8F;">Log Out?</h5>
         <p style="color:#6c757d; font-size:.9rem; margin-bottom:22px;">
           Are you sure you want to log out?<br>A backup will be saved automatically.
         </p>

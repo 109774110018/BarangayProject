@@ -30,7 +30,7 @@ include __DIR__ . '/../includes/resident_sidebar.php';
       <h5><i class="bi bi-house me-2"></i>Welcome, <?= e($acc['full_name']) ?>!</h5>
       <small><?= date('l, F j, Y') ?></small>
     </div>
-    <span class="badge bg-success">Resident</span>
+    <span class="badge bg-primary">Resident</span>
   </div>
 
   <div class="p-4">
@@ -42,14 +42,15 @@ include __DIR__ . '/../includes/resident_sidebar.php';
 
     <!-- Hero Banner -->
     <div class="rounded-3 p-4 mb-4 text-white"
-         style="background:linear-gradient(135deg,#1B5E20,#388E3C);">
+         style="background:linear-gradient(135deg,#0F2460,#1A3A8F);border-bottom:4px solid #E8A800;">
       <div class="row align-items-center">
-        <div class="col">
-          <h4 class="fw-bold mb-1">Barangay Resident Portal</h4>
-          <p class="mb-0 opacity-75">Submit requests, file complaints, and track your records online.</p>
-        </div>
         <div class="col-auto">
-          <i class="bi bi-building" style="font-size:3.5rem;opacity:.3;"></i>
+          <img src="/BarangayProject/Logo.jpg" alt="Logo"
+               style="width:72px;height:72px;border-radius:50%;border:3px solid #E8A800;box-shadow:0 0 16px rgba(232,168,0,.4);">
+        </div>
+        <div class="col">
+          <h4 class="fw-bold mb-1">Barangay San Rafael — Resident Portal</h4>
+          <p class="mb-0 opacity-75">Submit requests, file complaints, and track your records online.</p>
         </div>
       </div>
     </div>
@@ -57,7 +58,7 @@ include __DIR__ . '/../includes/resident_sidebar.php';
     <!-- Quick Stats -->
     <div class="row g-3 mb-4">
       <?php foreach ([
-        ['My Records',  $stats['total']   ?? 0, '#1B5E20', 'folder2-open'],
+        ['My Records',  $stats['total']   ?? 0, '#1A3A8F', 'folder2-open'],
         ['Pending',     $stats['pending'] ?? 0, '#F59E0B', 'hourglass-split'],
         ['Completed',   $stats['done']    ?? 0, '#43A047', 'patch-check'],
       ] as [$label, $val, $color, $icon]): ?>
@@ -78,7 +79,7 @@ include __DIR__ . '/../includes/resident_sidebar.php';
     <!-- Action Cards -->
     <div class="row g-3 mb-4">
       <?php foreach ([
-        ['Submit a Request',  'file-earmark-plus',     'submit_request.php',  '#1B5E20', 'Request official barangay documents like clearance, certificates, and permits.'],
+        ['Submit a Request',  'file-earmark-plus',     'submit_request.php',  '#1A3A8F', 'Request official barangay documents like clearance, certificates, and permits.'],
         ['File a Complaint',  'exclamation-triangle',  'file_complaint.php',  '#E53935', 'Report barangay concerns such as noise, illegal structures, or disputes.'],
         ['My Submissions',    'folder2-open',          'my_submissions.php',  '#7B1FA2', 'View all your submitted requests and complaints with their current status.'],
         ['Track Status',      'search',                'track_status.php',    '#1565C0', 'Check the status of any record using its Record ID.'],

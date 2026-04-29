@@ -6,9 +6,9 @@ define('DB_PASS', '');
 define('DB_NAME', 'barangay_db');
 
 // ─── App Settings ─────────────────────────────────────────────────────────
-define('APP_NAME',    'Barangay System');
-define('APP_TAGLINE', 'Complaint & Request Management');
-define('BARANGAY',    'Barangay JoelTown');
+define('APP_NAME',    'Brgy. San Rafael System');
+define('APP_TAGLINE', 'City of San Pablo, Laguna');
+define('BARANGAY',    'Barangay San Rafael');
 
 // ─── Session Start ────────────────────────────────────────────────────────
 if (session_status() === PHP_SESSION_NONE) {

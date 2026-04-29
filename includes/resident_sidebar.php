@@ -14,7 +14,7 @@ $initials = implode('', array_map(fn($w) => strtoupper($w[0]),
 ?>
 <div class="sidebar">
   <div class="sidebar-brand">
-    <div class="brand-icon"><i class="bi bi-building"></i></div>
+    <img src="/BarangayProject/Logo.jpg" alt="Barangay Logo" class="brand-logo">
     <h6><?= APP_NAME ?></h6>
     <small>Resident Portal</small>
   </div>
@@ -28,12 +28,12 @@ $initials = implode('', array_map(fn($w) => strtoupper($w[0]),
   </div>
 
   <nav class="sidebar-nav">
-    <?= res_nav('home.php',           'house',             'Home',            $current) ?>
-    <?= res_nav('submit_request.php', 'file-earmark-plus', 'Submit Request',  $current) ?>
-    <?= res_nav('file_complaint.php', 'exclamation-triangle','File Complaint', $current) ?>
-    <?= res_nav('my_submissions.php', 'folder2-open',      'My Submissions',  $current) ?>
-    <?= res_nav('track_status.php',   'search',            'Track Status',    $current) ?>
-    <?= res_nav('profile.php',        'person-circle',     'My Profile',      $current) ?>
+    <?= res_nav('home.php',           'house',              'Home',            $current) ?>
+    <?= res_nav('submit_request.php', 'file-earmark-plus',  'Submit Request',  $current) ?>
+    <?= res_nav('file_complaint.php', 'exclamation-triangle','File Complaint',  $current) ?>
+    <?= res_nav('my_submissions.php', 'folder2-open',       'My Submissions',  $current) ?>
+    <?= res_nav('track_status.php',   'search',             'Track Status',    $current) ?>
+    <?= res_nav('profile.php',        'person-circle',      'My Profile',      $current) ?>
   </nav>
 
   <div class="sidebar-footer">
@@ -48,10 +48,8 @@ $initials = implode('', array_map(fn($w) => strtoupper($w[0]),
       <div style="
           background:#fff; border-radius:12px; padding:28px 32px;
           max-width:360px; width:90%; text-align:center; box-shadow:0 8px 32px rgba(0,0,0,.2);">
-        <div style="font-size:2.5rem; color:#dc3545; margin-bottom:8px;">
-          <i class="bi bi-box-arrow-left"></i>
-        </div>
-        <h5 style="margin:0 0 6px; color:#212529;">Log Out?</h5>
+        <img src="/BarangayProject/Logo.jpg" alt="Logo" style="width:60px;height:60px;border-radius:50%;border:2px solid #E8A800;margin-bottom:12px;">
+        <h5 style="margin:0 0 6px; color:#1A3A8F;">Log Out?</h5>
         <p style="color:#6c757d; font-size:.9rem; margin-bottom:22px;">
           Are you sure you want to log out?
         </p>

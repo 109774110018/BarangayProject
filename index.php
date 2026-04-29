@@ -56,7 +56,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (db_fetch_one('SELECT id FROM resident_accounts WHERE username = ?', [$uname])) {
             $error = 'Username already taken.';
         } else {
-            // Create resident row
             $rid = 'RES-' . strtoupper(substr(uniqid(), -6));
             db_execute(
                 'INSERT INTO residents (resident_id, name, address, contact) VALUES (?,?,?,?)',
@@ -92,7 +91,7 @@ include __DIR__ . '/includes/header.php';
 
     <div class="login-card">
       <div class="login-header">
-        <i class="bi bi-building" style="font-size:2.6rem;"></i>
+        <img src="/BarangayProject/Logo.jpg" alt="Barangay San Rafael Logo" class="login-logo">
         <h4><?= APP_NAME ?></h4>
         <small><?= APP_TAGLINE ?></small>
       </div>
@@ -133,7 +132,7 @@ include __DIR__ . '/includes/header.php';
 
         <div class="tab-content" id="loginTabContent">
 
-          <!-- ── Admin Login ── -->
+          <!-- Admin Login -->
           <div class="tab-pane fade <?= $tab === 'admin' ? 'show active' : '' ?>" id="admin-pane">
             <form method="post">
               <input type="hidden" name="tab" value="admin">
@@ -163,7 +162,7 @@ include __DIR__ . '/includes/header.php';
             </form>
           </div>
 
-          <!-- ── Resident Login ── -->
+          <!-- Resident Login -->
           <div class="tab-pane fade <?= $tab === 'resident' ? 'show active' : '' ?>" id="resident-pane">
             <form method="post">
               <input type="hidden" name="tab" value="resident">
@@ -192,7 +191,7 @@ include __DIR__ . '/includes/header.php';
             </form>
           </div>
 
-          <!-- ── Register ── -->
+          <!-- Register -->
           <div class="tab-pane fade <?= $tab === 'register' ? 'show active' : '' ?>" id="register-pane">
             <form method="post">
               <input type="hidden" name="tab" value="register">
@@ -242,7 +241,7 @@ include __DIR__ . '/includes/header.php';
                   </button>
                 </div>
               </div>
-              <button type="submit" class="btn btn-success w-100 py-2 fw-bold">
+              <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">
                 <i class="bi bi-person-check me-1"></i> Create Account
               </button>
             </form>
@@ -258,10 +257,6 @@ include __DIR__ . '/includes/header.php';
   </div>
 </div>
 
-<style>
-  .nav-pills .nav-link { color: #555; background: #F5F5F5; border-radius: 8px; font-size: .85rem; }
-  .nav-pills .nav-link.active { background: #1B5E20; color: #fff; }
-</style>
 <script>
 function togglePw(id, btn) {
   const inp = document.getElementById(id);

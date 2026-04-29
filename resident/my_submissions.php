@@ -4,7 +4,7 @@ require_resident();
 $acc = current_resident();
 
 $filter = $_GET['filter'] ?? 'all';
-$sql = 'SELECT * FROM records WHERE resident_id = ? ORDER BY date_submitted DESC';
+$sql = 'SELECT * FROM records WHERE resident_id = ? AND (is_deleted IS NULL OR is_deleted = 0) ORDER BY date_submitted DESC';
 $records = db_fetch_all($sql, [$acc['resident_id'] ?? '']);
 
 if ($filter === 'request')   $records = array_filter($records, fn($r) => $r['record_type'] === 'request');
@@ -76,6 +76,10 @@ include __DIR__ . '/../includes/resident_sidebar.php';
                           data-date="<?= substr($r['date_submitted'],0,16) ?>">
                     <i class="bi bi-eye"></i> View
                   </button>
+                  <a href="/BarangayProject/resident/view_copy.php?id=<?= urlencode($r['record_id']) ?>"
+                     target="_blank" class="btn btn-sm btn-gold ms-1" title="View Document Copy">
+                    <i class="bi bi-file-earmark-text"></i>
+                  </a>
                 </td>
               </tr>
               <?php endforeach; ?>
@@ -92,7 +96,7 @@ include __DIR__ . '/../includes/resident_sidebar.php';
 <div class="modal fade" id="detailModal" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header" style="background:#1B5E20;color:#fff;">
+      <div class="modal-header" class="brand-header">
         <h5 class="modal-title"><i class="bi bi-file-text me-2"></i>Submission Details</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>

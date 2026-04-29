@@ -15,7 +15,7 @@
 <script
   src="https://www.tuqlas.com/chatbot.js"
   data-key="tq_live_3dffb1f6fc1579a1bb36f5f71ee4c31529d20756"
-  data-api="https://www.tuqlas.com"
+  data-api="https://www.tuqlas.cxom"
   defer                               
 ></script>
 

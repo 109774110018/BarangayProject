@@ -1,5 +1,5 @@
 -- ============================================================
---  Barangay System — Database Setup
+--  Barangay System — Database Setup (Updated with Soft Delete)
 --  Run this in phpMyAdmin or MySQL CLI
 -- ============================================================
 
@@ -54,6 +54,11 @@ CREATE TABLE IF NOT EXISTS records (
     status         ENUM('Pending','Approved','Done','Rejected') DEFAULT 'Pending',
     resident_id    VARCHAR(10)  NOT NULL,
     date_submitted DATETIME DEFAULT CURRENT_TIMESTAMP,
+    -- Soft delete fields
+    is_deleted     TINYINT(1) DEFAULT 0,
+    deleted_at     DATETIME NULL,
+    deleted_by     VARCHAR(100) NULL,
+    delete_reason  VARCHAR(255) NULL,
     FOREIGN KEY (resident_id) REFERENCES residents(resident_id)
         ON DELETE CASCADE
 );
@@ -67,3 +72,9 @@ CREATE TABLE IF NOT EXISTS notifications (
     FOREIGN KEY (record_id) REFERENCES records(record_id)
         ON DELETE CASCADE
 );
+
+-- Migration: Add soft delete columns if they don't exist yet
+ALTER TABLE records ADD COLUMN IF NOT EXISTS is_deleted TINYINT(1) DEFAULT 0;
+ALTER TABLE records ADD COLUMN IF NOT EXISTS deleted_at DATETIME NULL;
+ALTER TABLE records ADD COLUMN IF NOT EXISTS deleted_by VARCHAR(100) NULL;
+ALTER TABLE records ADD COLUMN IF NOT EXISTS delete_reason VARCHAR(255) NULL;
