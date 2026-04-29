@@ -1,0 +1,8 @@
+Options -Indexes
+RewriteEngine On
+
+# Redirect root to index.php
+RewriteRule ^$ index.php [L]
+
+# Security: block direct access to includes
+RewriteRule ^includes/ - [F,L]
