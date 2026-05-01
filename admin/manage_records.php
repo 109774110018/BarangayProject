@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/config.php';
+start_admin_session();
 require_admin();
 
 // ── Handle POST actions ──────────────────────────────────────

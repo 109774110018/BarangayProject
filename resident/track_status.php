@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/config.php';
+start_resident_session();
 require_resident();
 
 $record   = null;

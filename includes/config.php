@@ -9,11 +9,53 @@ define('DB_NAME', 'barangay_db');
 define('APP_NAME',    'Brgy. San Rafael System');
 define('APP_TAGLINE', 'City of San Pablo, Laguna');
 define('BARANGAY',    'Barangay San Rafael');
+define('BASE_PATH',   '/BarangayProject');   // ← single place to change the folder name
 
-// ─── Session Start ────────────────────────────────────────────────────────
-if (session_status() === PHP_SESSION_NONE) {
+// ─── Dual-Session Architecture ────────────────────────────────────────────
+// Admin and Resident use SEPARATE PHP sessions with different names and
+// cookie paths so they can never bleed into each other, even across browser
+// tabs.  Each session is started on demand by the helpers below; the shared
+// session_start() that was here before is intentionally removed.
+//
+// Call start_admin_session()    at the top of every admin page.
+// Call start_resident_session() at the top of every resident page.
+// ─────────────────────────────────────────────────────────────────────────
+
+function start_admin_session(): void {
+    if (session_status() === PHP_SESSION_ACTIVE && session_name() === 'BRGY_ADMIN') return;
+    if (session_status() === PHP_SESSION_ACTIVE) session_write_close(); // close any other session
+
+    session_name('BRGY_ADMIN');
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path'     => BASE_PATH . '/admin/',   // cookie only sent to /BarangayProject/admin/*
+        'secure'   => false,                   // set true on HTTPS
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
     session_start();
 }
+
+function start_resident_session(): void {
+    if (session_status() === PHP_SESSION_ACTIVE && session_name() === 'BRGY_RESIDENT') return;
+    if (session_status() === PHP_SESSION_ACTIVE) session_write_close();
+
+    session_name('BRGY_RESIDENT');
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path'     => BASE_PATH . '/',         // cookie sent to all of /BarangayProject/*
+        'secure'   => false,
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+    session_start();
+}
+
+// Legacy shim: some shared includes (header.php, flash helpers) call
+// session_start() implicitly via get_flash() / flash().  We start the
+// resident session by default for shared pages; admin pages call
+// start_admin_session() before including config.php effects are used.
+// Actually we do nothing here — each page bootstraps its own session.
 
 // ─── DB Connection ────────────────────────────────────────────────────────
 function db(): mysqli {
@@ -61,23 +103,26 @@ function db_insert_id(): int {
 
 // ─── Auth Helpers ─────────────────────────────────────────────────────────
 function is_admin(): bool {
-    return isset($_SESSION['admin_id']);
+    // Only valid inside an admin session
+    return session_name() === 'BRGY_ADMIN' && isset($_SESSION['admin_id']);
 }
 
 function is_resident(): bool {
-    return isset($_SESSION['resident_account_id']);
+    return session_name() === 'BRGY_RESIDENT' && isset($_SESSION['resident_account_id']);
 }
 
 function require_admin(): void {
+    start_admin_session();
     if (!is_admin()) {
-        header('Location: /BarangayProject/index.php');
+        header('Location: ' . BASE_PATH . '/admin/login.php');
         exit;
     }
 }
 
 function require_resident(): void {
+    start_resident_session();
     if (!is_resident()) {
-        header('Location: /BarangayProject/index.php');
+        header('Location: ' . BASE_PATH . '/index.php');
         exit;
     }
 }

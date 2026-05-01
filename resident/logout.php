@@ -6,6 +6,7 @@
 // ─────────────────────────────────────────────────────────────────────────
 
 require_once __DIR__ . '/../includes/config.php';
+start_resident_session();
 require_once __DIR__ . '/../includes/backup.php';
 
 // ── 1. Auto Backup on Logout ──────────────────────────────────────────────
