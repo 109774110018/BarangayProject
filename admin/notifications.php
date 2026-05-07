@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/config.php';
 start_admin_session();
+start_admin_session();
 require_admin();
 
 $notifs = db_fetch_all('

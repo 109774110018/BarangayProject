@@ -4,7 +4,8 @@ start_admin_session();
 require_admin();
 
 // ── Handle POST actions ──────────────────────────────────────
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    verify_csrf();
     $action = $_POST['action'] ?? '';
     $rid    = trim($_POST['record_id'] ?? '');
 

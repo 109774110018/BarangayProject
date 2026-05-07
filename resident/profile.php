@@ -7,7 +7,8 @@ $acc = current_resident();
 $success = '';
 $error   = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    verify_csrf();
     $action   = $_POST['action'] ?? '';
     $name     = trim($_POST['full_name'] ?? '');
     $address  = trim($_POST['address']   ?? '');
@@ -127,7 +128,7 @@ include __DIR__ . '/../includes/resident_sidebar.php';
             <i class="bi bi-pencil me-2"></i>Edit Profile Information
           </div>
           <div class="card-body p-4">
-            <form method="post">
+            <form method="post" novalidate><?= csrf_field() ?>
               <input type="hidden" name="action" value="update_info">
               <div class="row g-3">
                 <div class="col-12">
@@ -167,7 +168,7 @@ include __DIR__ . '/../includes/resident_sidebar.php';
             <i class="bi bi-shield-lock me-2"></i>Change Password
           </div>
           <div class="card-body p-4">
-            <form method="post">
+            <form method="post" novalidate><?= csrf_field() ?>
               <input type="hidden" name="action" value="change_password">
               <div class="row g-3">
                 <div class="col-12">

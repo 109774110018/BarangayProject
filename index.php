@@ -9,13 +9,15 @@ $error = '';
 $tab   = $_GET['tab'] ?? 'login';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf();
     $tab  = $_POST['tab'] ?? 'login';
     $user = trim($_POST['username'] ?? '');
     $pass = trim($_POST['password'] ?? '');
 
     if ($tab === 'login') {
-        $acc = db_fetch_one('SELECT * FROM resident_accounts WHERE username = ? AND password = ?', [$user, $pass]);
-        if ($acc) {
+        $acc = db_fetch_one('SELECT * FROM resident_accounts WHERE username = ?', [$user]);
+        if ($acc && verify_password($pass, $acc['password'])) {
+            maybe_upgrade_hash($pass, $acc['password'], $acc['id']);
             $_SESSION['resident_account_id'] = $acc['id'];
             $_SESSION['resident_name']       = $acc['full_name'];
             header('Location: /BarangayProject/resident/home.php');
@@ -42,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $rid = 'RES-' . strtoupper(substr(uniqid(), -6));
             db_execute('INSERT INTO residents (resident_id, name, address, contact) VALUES (?,?,?,?)', [$rid, $fname, $address, $contact]);
-            db_execute('INSERT INTO resident_accounts (username, password, full_name, address, contact, resident_id) VALUES (?,?,?,?,?,?)', [$uname, $pwd, $fname, $address, $contact, $rid]);
+            db_execute('INSERT INTO resident_accounts (username, password, full_name, address, contact, resident_id) VALUES (?,?,?,?,?,?)', [$uname, hash_password($pwd), $fname, $address, $contact, $rid]);
             flash('success', "Account created! Your Resident ID: <strong>{$rid}</strong>. You may now log in.");
             header('Location: /BarangayProject/index.php?tab=login');
             exit;
@@ -271,6 +273,7 @@ $flash = get_flash();
   <!-- LOGIN PANE -->
   <div class="auth-pane <?= $tab !== 'register' ? 'active' : '' ?>" id="pane-login">
     <form method="post">
+      <?= csrf_field() ?>
       <input type="hidden" name="tab" value="login">
       <div class="field-group">
         <label class="field-label">Username</label>
@@ -295,6 +298,7 @@ $flash = get_flash();
   <!-- REGISTER PANE -->
   <div class="auth-pane <?= $tab === 'register' ? 'active' : '' ?>" id="pane-register">
     <form method="post">
+      <?= csrf_field() ?>
       <input type="hidden" name="tab" value="register">
       <div class="row g-3">
         <div class="col-12">
