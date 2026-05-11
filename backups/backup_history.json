@@ -1,0 +1,14 @@
+[
+    {
+        "filename": "backup_2026_05_11_030829_empty_trash.sql",
+        "trigger": "empty_trash",
+        "size_bytes": 7753,
+        "created_at": "2026-05-11 03:08:29"
+    },
+    {
+        "filename": "backup_2026_05_11.sql",
+        "trigger": "logout",
+        "size_bytes": 8040,
+        "created_at": "2026-05-11 03:07:42"
+    }
+]

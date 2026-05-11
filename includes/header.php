@@ -25,7 +25,7 @@
     .sidebar-user .user-info small{color:rgba(255,255,255,.38);font-size:.65rem;}
     .sidebar-nav{flex:1;padding:6px 12px;display:flex;flex-direction:column;gap:1px;overflow-y:auto;}
     .sidebar-nav .nav-section{font-size:.58rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.2);padding:10px 10px 3px;}
-    .sidebar-nav .nav-link{color:rgba(255,255,255,.55);padding:9px 13px;border-radius:8px;font-size:.82rem;font-weight:500;display:flex;align-items:center;gap:10px;transition:all .15s;position:relative;}
+    .sidebar-nav .nav-link{color:rgba(255,255,255,.55);padding:7px 11px;border-radius:7px;font-size:.8rem;font-weight:500;display:flex;align-items:center;gap:9px;transition:all .15s;position:relative;}
     .sidebar-nav .nav-link i{font-size:.92rem;width:16px;text-align:center;flex-shrink:0;}
     .sidebar-nav .nav-link:hover{background:rgba(255,255,255,.08);color:#fff;}
     .sidebar-nav .nav-link.active{background:rgba(212,160,23,.14);color:var(--gold-bright);font-weight:600;}
