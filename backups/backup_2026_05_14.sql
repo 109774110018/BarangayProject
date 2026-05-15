@@ -1,8 +1,8 @@
 -- ============================================================
 --  Barangay San Rafael — Database Backup
 --  Database : barangay_db
---  Generated: 2026-05-11 03:08:29
---  Trigger  : empty_trash
+--  Generated: 2026-05-14 06:29:32
+--  Trigger  : logout
 --  Schedule : daily
 -- ============================================================
 
@@ -38,7 +38,8 @@ INSERT INTO `residents` VALUES
 ('B4083662', 'Julian Malolos', 'San Gregorio', '12132112'),
 ('RES-06D8EA', 'Lebrone', '0588, San Gregorio Homes', '38743897489'),
 ('RES-AABF6B', 'David Esteban', 'JoelTown', '982874434'),
-('RES-B430AE', 'lebb', 'purok 1 brgy V-B', '0928838282');
+('RES-B430AE', 'lebb', 'purok 1 brgy V-B', '0928838282'),
+('RES-DCC0B3', 'John', 'San Rafael', '09997867676');
 
 -- Table: `resident_accounts`
 DROP TABLE IF EXISTS `resident_accounts`;
@@ -55,12 +56,13 @@ CREATE TABLE `resident_accounts` (
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `resident_id` (`resident_id`),
   CONSTRAINT `resident_accounts_ibfk_1` FOREIGN KEY (`resident_id`) REFERENCES `residents` (`resident_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `resident_accounts` VALUES
 ('1', 'Julian', '$2y$10$gR21tj0n8FBqwHx0DzBsROocbC/aTLWwHpcxkkbRE9b1Ljoi6LtF2', 'Julian Malolos', 'San Gregorio', '12132112', 'B4083662', '2026-04-23 19:35:42'),
 ('3', 'leb', '123456789', 'lebb', 'purok 1 brgy V-B', '0928838282', 'RES-B430AE', '2026-04-28 12:38:35'),
-('4', 'SK Chairman', 'jthood123', 'David Esteban', 'JoelTown', '982874434', 'RES-AABF6B', '2026-04-29 12:45:30');
+('4', 'SK Chairman', 'jthood123', 'David Esteban', 'JoelTown', '982874434', 'RES-AABF6B', '2026-04-29 12:45:30'),
+('5', 'Konsehal', '$2y$10$gcauL55I36jwKMbwDYxPyO4oj1odGn6T7rjk810lALmy/F36T01qC', 'John', 'San Rafael', '09997867676', 'RES-DCC0B3', '2026-05-11 09:11:25');
 
 -- Table: `records`
 DROP TABLE IF EXISTS `records`;
@@ -82,8 +84,12 @@ CREATE TABLE `records` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `records` VALUES
+('CMP-146790', 'complaint', 'B4083662', 'Garbage / Sanitation', 'Tagal kumuha ng basura!', 'Done', '2026-05-14 09:30:25', '0', NULL, NULL, NULL),
+('CMP-23589C', 'complaint', 'RES-DCC0B3', 'Illegal Parking', 'Urgent', 'Pending', '2026-05-11 09:12:02', '0', NULL, NULL, NULL),
 ('CMP-F024B4', 'complaint', 'RES-AABF6B', 'Garbage / Sanitation', 'Ang kalat', 'Done', '2026-04-29 12:51:59', '0', NULL, NULL, NULL),
+('REQ-2D0DBB', 'request', 'RES-DCC0B3', 'Business Permit', '', 'Pending', '2026-05-11 09:11:46', '0', NULL, NULL, NULL),
 ('REQ-5116F0', 'request', 'B4083662', 'Other Document', 'urgent', 'Approved', '2026-05-01 19:11:49', '0', NULL, NULL, NULL),
+('REQ-98F01D', 'request', 'B4083662', 'Certificate of Indigency', '', 'Pending', '2026-05-14 09:28:57', '0', NULL, NULL, NULL),
 ('REQ-BC798D', 'request', 'RES-B430AE', 'Community Tax Certificate (CEDULA)', 'need for business', 'Done', '2026-04-28 12:41:47', '0', NULL, NULL, NULL);
 
 -- Table: `notifications`
@@ -96,13 +102,14 @@ CREATE TABLE `notifications` (
   PRIMARY KEY (`id`),
   KEY `record_id` (`record_id`),
   CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`record_id`) REFERENCES `records` (`record_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `notifications` VALUES
 ('12', 'REQ-BC798D', 'Status updated to \'Approved\' by Barangay Captain on 2026-04-28 06:42', '2026-04-28 12:42:26'),
 ('13', 'REQ-BC798D', 'Status updated to \'Done\' by Barangay Captain on 2026-04-28 06:42', '2026-04-28 12:42:56'),
 ('16', 'CMP-F024B4', 'Status updated to \'Done\' by Barangay Captain on 2026-04-29 06:54', '2026-04-29 12:54:02'),
-('21', 'REQ-5116F0', 'Status updated to \'Approved\' by Barangay Captain on 2026-05-07 07:58', '2026-05-07 13:58:14');
+('21', 'REQ-5116F0', 'Status updated to \'Approved\' by Barangay Captain on 2026-05-07 07:58', '2026-05-07 13:58:14'),
+('22', 'CMP-146790', 'Status updated to \'Done\' by Barangay Captain on 2026-05-14 03:40', '2026-05-14 09:40:50');
 
 -- Table: `archives`
 DROP TABLE IF EXISTS `archives`;

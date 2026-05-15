@@ -1,372 +1,304 @@
 <?php
-require_once __DIR__ . '/../includes/config.php';
-start_admin_session();
-require_admin();
+require_once __DIR__.'/../includes/config.php';
+start_admin_session(); require_admin();
 
 $record_id = trim($_GET['id'] ?? '');
-if (!$record_id) {
-    die('<div class="alert alert-danger m-4">No record ID provided.</div>');
-}
+if (!$record_id) die('<div class="alert alert-danger m-4">No record ID provided.</div>');
 
-$record = db_fetch_one('
-    SELECT r.*, res.name, res.address, res.contact, res.resident_id as res_id
-    FROM records r
-    JOIN residents res ON r.resident_id = res.resident_id
-    WHERE r.record_id = ?
-', [$record_id]);
+$record = db_fetch_one('SELECT r.*,res.name,res.address,res.contact,res.resident_id as res_id FROM records r JOIN residents res ON r.resident_id=res.resident_id WHERE r.record_id=?', [$record_id]);
+if (!$record) die('<div class="alert alert-danger m-4">Record not found.</div>');
 
-if (!$record) {
-    die('<div class="alert alert-danger m-4">Record not found.</div>');
-}
+$admin       = current_admin();
+$status      = $record['status'];
+$category    = $record['category'];
+$type        = $record['record_type'];
+$printable   = in_array($status, ['Approved','Done']);
+$doc_number  = strtoupper($record['record_id']);
+$print_date  = date('F j, Y');
+$print_time  = date('h:i A');
+$control_no  = 'BRY-'.date('Y').'-'.strtoupper(substr($record_id,-6));
 
-$admin = current_admin();
-$is_deleted = $record['is_deleted'] ?? 0;
-$doc_number = strtoupper($record['record_id']);
-$type_label = strtoupper($record['record_type']);
-$print_date = date('F j, Y');
-$print_time = date('h:i A');
+// Map category to official document title
+$doc_titles = [
+    'Barangay Clearance'          => 'BARANGAY CLEARANCE',
+    'Certificate of Indigency'    => 'CERTIFICATE OF INDIGENCY',
+    'Certificate of Residency'    => 'CERTIFICATE OF RESIDENCY',
+    'Business Permit'             => 'BARANGAY BUSINESS CLEARANCE',
+    'Business Clearance'          => 'BARANGAY BUSINESS CLEARANCE',
+    'Business Permit/Clearance'   => 'BARANGAY BUSINESS CLEARANCE',
+    'Community Tax Certificate (CEDULA)' => 'COMMUNITY TAX CERTIFICATE',
+    'Barangay ID'                 => 'BARANGAY IDENTIFICATION CARD',
+];
+$doc_title = $doc_titles[$category] ?? 'BARANGAY SERVICE RECORD';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Official Copy — <?= e($doc_number) ?></title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title><?= e($doc_title) ?> — <?= e($doc_number) ?></title>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    * { font-family: 'Inter', sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Inter',sans-serif;background:#E8E8E8;padding:24px;}
 
-    body {
-      background: #f0f0f0;
-      padding: 20px;
-    }
+    /* Screen controls */
+    .controls{max-width:800px;margin:0 auto 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+    .btn-ctrl{padding:9px 20px;border-radius:8px;border:none;cursor:pointer;font-size:.85rem;font-weight:600;display:inline-flex;align-items:center;gap:6px;}
+    .btn-print{background:#0B1F4B;color:#fff;}
+    .btn-print:hover{background:#152D6E;}
+    .btn-back{background:#6c757d;color:#fff;}
+    .btn-back:hover{background:#5a6268;}
+    .locked-notice{background:#FEF3C7;border:1px solid #FCD34D;border-radius:8px;padding:10px 16px;font-size:.83rem;color:#92400E;display:flex;align-items:center;gap:8px;}
+    .approved-notice{background:#D1FAE5;border:1px solid #6EE7B7;border-radius:8px;padding:10px 16px;font-size:.83rem;color:#065F46;display:flex;align-items:center;gap:8px;}
 
-    .print-controls {
-      max-width: 760px; margin: 0 auto 16px;
-      display: flex; gap: 10px;
-    }
+    /* Document page */
+    .document-page{max-width:800px;margin:0 auto;background:#fff;padding:52px 60px;box-shadow:0 4px 24px rgba(0,0,0,.15);position:relative;min-height:1050px;}
 
-    .document-page {
-      max-width: 760px; margin: 0 auto;
-      background: #fff;
-      padding: 48px 52px;
-      box-shadow: 0 4px 24px rgba(0,0,0,.12);
-      border-radius: 4px;
-      position: relative;
+    /* Watermark for non-printable */
+    .document-page.draft::before{
+      content:'DRAFT — NOT APPROVED';
+      position:absolute;top:50%;left:50%;
+      transform:translate(-50%,-50%) rotate(-35deg);
+      font-size:4rem;font-weight:900;
+      color:rgba(220,53,69,.06);
+      letter-spacing:.15em;pointer-events:none;z-index:0;white-space:nowrap;
     }
+    .document-page > *{position:relative;z-index:1;}
 
-    /* Watermark for deleted records */
-    .document-page.is-deleted::before {
-      content: 'DELETED';
-      position: absolute; top: 50%; left: 50%;
-      transform: translate(-50%,-50%) rotate(-35deg);
-      font-size: 6rem; font-weight: 900;
-      color: rgba(220,53,69,.08);
-      letter-spacing: .2em;
-      pointer-events: none;
-      z-index: 0;
-    }
+    /* Republic header */
+    .rep-header{text-align:center;margin-bottom:20px;}
+    .rep-header .rep-line{font-size:.72rem;color:#444;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px;}
+    .logo-row{display:flex;align-items:center;justify-content:center;gap:24px;margin:12px 0;}
+    .logo-row img{width:88px;height:88px;border-radius:50%;border:3px solid #D4A017;object-fit:cover;}
+    .logo-row .brgy-info{text-align:center;}
+    .logo-row .brgy-name{font-size:1.45rem;font-weight:800;color:#0B1F4B;letter-spacing:.02em;font-family:'EB Garamond',serif;}
+    .logo-row .brgy-city{font-size:.88rem;color:#444;font-weight:500;}
+    .logo-row .brgy-office{font-size:.78rem;color:#666;margin-top:2px;}
 
-    .document-page > * { position: relative; z-index: 1; }
+    /* Horizontal rule with gold */
+    .hr-gold{border:none;border-top:4px solid #0B1F4B;margin:0;position:relative;}
+    .hr-gold::after{content:'';display:block;border-top:2px solid #D4A017;margin-top:3px;}
 
-    /* Header */
-    .doc-header {
-      text-align: center;
-      border-bottom: 3px solid #1A3A8F;
-      padding-bottom: 20px;
-      margin-bottom: 24px;
-    }
-    .doc-header .logo-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-      margin-bottom: 12px;
-    }
-    .doc-header img.doc-logo {
-      width: 80px; height: 80px;
-      border-radius: 50%;
-      border: 3px solid #E8A800;
-    }
-    .doc-header .header-text { text-align: center; }
-    .doc-header .republic-line { font-size: .75rem; color: #555; letter-spacing: .08em; text-transform: uppercase; }
-    .doc-header .barangay-name { font-size: 1.4rem; font-weight: 800; color: #1A3A8F; letter-spacing: .03em; }
-    .doc-header .city-line { font-size: .9rem; color: #444; font-weight: 500; }
+    /* Document title box */
+    .doc-title-box{text-align:center;margin:22px 0 18px;padding:14px 20px;background:#F8FAFF;border:2px solid #0B1F4B;border-radius:4px;}
+    .doc-title-box .doc-title{font-family:'EB Garamond',serif;font-size:1.55rem;font-weight:700;color:#0B1F4B;letter-spacing:.15em;text-transform:uppercase;}
+    .doc-title-box .doc-subtitle{font-size:.75rem;color:#666;margin-top:3px;letter-spacing:.05em;}
 
-    .doc-title {
-      font-size: 1.15rem; font-weight: 800;
-      letter-spacing: .1em; text-transform: uppercase;
-      color: #1A3A8F; margin-top: 10px;
-      display: inline-block;
-      background: #FFF8E1;
-      border: 2px solid #E8A800;
-      padding: 6px 24px;
-      border-radius: 4px;
-    }
+    /* Control number row */
+    .control-row{display:flex;justify-content:space-between;align-items:center;font-size:.75rem;color:#666;margin-bottom:18px;padding:8px 12px;background:#F8FAFF;border:1px solid #E2E8F0;border-radius:4px;}
+    .control-row strong{color:#0B1F4B;}
 
-    /* Gold accent line */
-    .gold-line {
-      height: 3px;
-      background: linear-gradient(90deg, #E8A800, #F5C100, #E8A800);
-      border-radius: 2px;
-      margin: 20px 0;
-    }
+    /* Body text */
+    .doc-body{font-family:'EB Garamond',serif;font-size:1.08rem;line-height:1.9;color:#1a1a1a;margin:20px 0;}
+    .doc-body .salutation{margin-bottom:16px;}
+    .doc-body .indent{text-indent:3em;}
+    .doc-body .resident-name{font-weight:700;text-decoration:underline;font-size:1.12rem;}
+    .doc-body .highlight{font-weight:700;color:#0B1F4B;}
 
-    /* Document Info Box */
-    .doc-info-box {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 10px; margin-bottom: 20px;
-    }
-    .doc-info-item label {
-      font-size: .7rem; text-transform: uppercase;
-      letter-spacing: .07em; color: #888; font-weight: 600; display: block;
-    }
-    .doc-info-item span {
-      font-size: .9rem; font-weight: 700; color: #1A3A8F;
-    }
+    /* Details box */
+    .details-box{border:1px solid #E2E8F0;border-radius:4px;margin:16px 0;overflow:hidden;}
+    .details-box table{width:100%;border-collapse:collapse;}
+    .details-box table td{padding:9px 14px;border-bottom:1px solid #F1F5F9;font-size:.88rem;vertical-align:top;}
+    .details-box table td:first-child{background:#F8FAFF;font-weight:600;color:#444;width:35%;font-size:.82rem;text-transform:uppercase;letter-spacing:.04em;}
+    .details-box table tr:last-child td{border-bottom:none;}
 
-    /* Section headers */
-    .section-header {
-      background: #1A3A8F; color: #fff;
-      padding: 6px 14px; font-size: .78rem;
-      text-transform: uppercase; letter-spacing: .1em;
-      font-weight: 700; margin: 20px 0 12px;
-      border-left: 5px solid #E8A800;
-    }
+    /* Certification line */
+    .cert-line{margin:18px 0;padding:14px 18px;background:#EFF6FF;border-left:4px solid #0B1F4B;border-radius:0 4px 4px 0;font-size:.9rem;color:#1E293B;}
 
-    /* Detail rows */
-    .detail-table { width: 100%; border-collapse: collapse; }
-    .detail-table tr td {
-      padding: 8px 10px; border: 1px solid #E0E0E0;
-      font-size: .88rem; vertical-align: top;
-    }
-    .detail-table tr td:first-child {
-      background: #F8FAFF; font-weight: 600;
-      color: #555; width: 32%; font-size: .82rem;
-    }
-
-    /* Status badge */
-    .status-box {
-      display: inline-block; padding: 5px 18px;
-      border-radius: 4px; font-weight: 700;
-      font-size: .88rem; letter-spacing: .05em;
-    }
-    .status-Pending  { background: #FFF3CD; color: #856404; border: 1px solid #FFE69C; }
-    .status-Approved { background: #CFE2FF; color: #084298; border: 1px solid #B6D4FE; }
-    .status-Done     { background: #D1E7DD; color: #0F5132; border: 1px solid #A3CFBB; }
-    .status-Rejected { background: #F8D7DA; color: #842029; border: 1px solid #F5C2C7; }
+    /* Validity */
+    .validity-box{margin:16px 0;padding:10px 16px;background:#FEF9EC;border:1px solid rgba(212,160,23,.3);border-radius:4px;font-size:.82rem;color:#92400E;display:flex;align-items:center;gap:8px;}
 
     /* Signature section */
-    .signature-section {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 40px; margin-top: 36px;
-    }
-    .sig-block { text-align: center; }
-    .sig-block .sig-line {
-      border-bottom: 1px solid #333;
-      margin-bottom: 6px;
-      height: 40px;
-    }
-    .sig-block .sig-name { font-weight: 700; font-size: .88rem; }
-    .sig-block .sig-title { font-size: .75rem; color: #666; }
+    .sig-section{margin-top:36px;display:grid;grid-template-columns:1fr 1fr;gap:48px;}
+    .sig-block{text-align:center;}
+    .sig-line{border-bottom:1.5px solid #333;height:48px;margin-bottom:6px;}
+    .sig-name{font-weight:700;font-size:.9rem;color:#0B1F4B;}
+    .sig-title{font-size:.75rem;color:#666;margin-top:2px;}
+    .sig-stamp{width:80px;height:80px;border:2px dashed #CCC;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;color:#CCC;text-align:center;margin:8px auto 0;line-height:1.3;}
 
-    /* Footer */
-    .doc-footer {
-      margin-top: 28px; padding-top: 14px;
-      border-top: 1px solid #DDD;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .doc-footer small { font-size: .7rem; color: #999; }
-    .doc-footer .qr-placeholder {
-      width: 50px; height: 50px;
-      border: 1px dashed #CCC;
-      display: flex; align-items: center; justify-content: center;
-      font-size: .55rem; color: #CCC; text-align: center;
-      border-radius: 4px;
-    }
+    /* OR Number box */
+    .or-box{margin-top:24px;padding:10px 16px;border:1px dashed #CCC;border-radius:4px;display:flex;gap:32px;font-size:.8rem;color:#666;}
+    .or-box .or-field{flex:1;}
+    .or-box .or-label{font-weight:600;color:#444;display:block;margin-bottom:4px;font-size:.72rem;text-transform:uppercase;}
+    .or-box .or-value{border-bottom:1px solid #CCC;padding-bottom:3px;min-width:100px;display:inline-block;}
 
-    /* Copy label */
-    .copy-ribbon {
-      position: absolute; top: 18px; right: -8px;
-      background: #E8A800; color: #1A3A8F;
-      font-weight: 800; font-size: .72rem;
-      letter-spacing: .1em; text-transform: uppercase;
-      padding: 4px 14px;
-      clip-path: polygon(0 0, 100% 0, 100% 100%, 8px 100%);
-    }
+    /* Document footer */
+    .doc-footer{margin-top:28px;padding-top:12px;border-top:1px solid #DDD;display:flex;justify-content:space-between;align-items:flex-end;}
+    .doc-footer small{font-size:.68rem;color:#999;line-height:1.6;}
+    .not-valid-box{background:#FEF2F2;border:1px solid #FECACA;border-radius:4px;padding:6px 12px;font-size:.72rem;color:#991B1B;font-weight:600;}
 
-    /* Print controls */
-    .btn-print-ctrl {
-      padding: 8px 20px; border-radius: 8px;
-      border: none; cursor: pointer;
-      font-size: .88rem; font-weight: 600;
-      display: inline-flex; align-items: center; gap: 6px;
-    }
-    .btn-blue { background: #1A3A8F; color: #fff; }
-    .btn-blue:hover { background: #0F2460; }
-    .btn-back { background: #6c757d; color: #fff; }
-    .btn-back:hover { background: #5a6268; }
-
-    @media print {
-      body { background: #fff; padding: 0; }
-      .print-controls { display: none !important; }
-      .document-page { box-shadow: none; border-radius: 0; margin: 0; max-width: 100%; }
+    @media print{
+      body{background:#fff;padding:0;}
+      .controls{display:none!important;}
+      .document-page{box-shadow:none;margin:0;max-width:100%;padding:40px 48px;min-height:auto;}
     }
   </style>
 </head>
 <body>
 
-<div class="print-controls">
-  <button class="btn-print-ctrl btn-blue" onclick="window.print()">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-      <rect x="6" y="14" width="12" height="8"/>
-    </svg>
-    Print / Save as PDF
+<!-- SCREEN CONTROLS -->
+<div class="controls">
+  <button class="btn-ctrl btn-back" onclick="history.back()">← Back</button>
+  <?php if($printable): ?>
+  <button class="btn-ctrl btn-print" onclick="window.print()">
+    🖨️ Print / Save as PDF
   </button>
-  <button class="btn-print-ctrl btn-back" onclick="history.back()">
-    ← Back
-  </button>
-  <?php if ($is_deleted): ?>
-  <span style="background:#dc3545;color:#fff;padding:8px 16px;border-radius:8px;font-size:.85rem;font-weight:600;">
-    ⚠ This record is in TRASH
-  </span>
+  <div class="approved-notice">✅ Document is <strong><?= e($status) ?></strong> — ready to print and release to resident.</div>
+  <?php else: ?>
+  <div class="locked-notice">🔒 Printing is locked. Status is <strong><?= e($status) ?></strong>. Document can only be printed once the Barangay Captain or Secretary sets status to <strong>Approved</strong>.</div>
   <?php endif; ?>
 </div>
 
-<div class="document-page <?= $is_deleted ? 'is-deleted' : '' ?>">
+<!-- DOCUMENT PAGE -->
+<div class="document-page <?= !$printable?'draft':'' ?>">
 
-  <div class="copy-ribbon">Official Copy</div>
-
-  <!-- Document Header -->
-  <div class="doc-header">
-    <div class="logo-row">
-      <img src="/BarangayProject/Logo.jpg" alt="Barangay Logo" class="doc-logo">
-      <div class="header-text">
-        <div class="republic-line">Republic of the Philippines</div>
-        <div class="republic-line">City of San Pablo, Laguna</div>
-        <div class="barangay-name">Barangay San Rafael</div>
-        <div class="city-line">Office of the Barangay Captain</div>
-      </div>
-    </div>
-    <div class="doc-title">
-      <?= $type_label === 'REQUEST' ? 'Barangay Service Request' : 'Barangay Complaint Record' ?>
+  <?php if($type==='complaint'): ?>
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- COMPLAINT RECORD                               -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="rep-header">
+    <div class="rep-line">Republic of the Philippines</div>
+    <div class="rep-line">Province of Laguna · City of San Pablo</div>
+  </div>
+  <div class="logo-row">
+    <img src="/BarangayProject/Logo.jpg" alt="Logo">
+    <div class="brgy-info">
+      <div class="brgy-name">Barangay San Rafael</div>
+      <div class="brgy-city">City of San Pablo, Laguna</div>
+      <div class="brgy-office">Office of the Barangay Captain</div>
     </div>
   </div>
-
-  <div class="gold-line"></div>
-
-  <!-- Document Info -->
-  <div class="doc-info-box">
-    <div class="doc-info-item">
-      <label>Document / Reference No.</label>
-      <span><?= e($doc_number) ?></span>
-    </div>
-    <div class="doc-info-item">
-      <label>Record Type</label>
-      <span><?= e($type_label) ?></span>
-    </div>
-    <div class="doc-info-item">
-      <label>Date & Time Filed</label>
-      <span><?= e(substr($record['date_submitted'],0,16)) ?></span>
-    </div>
-    <div class="doc-info-item">
-      <label>Current Status</label>
-      <span class="status-box status-<?= e($record['status']) ?>"><?= e($record['status']) ?></span>
-    </div>
+  <hr class="hr-gold">
+  <div class="doc-title-box">
+    <div class="doc-title">Barangay Complaint Record</div>
+    <div class="doc-subtitle">Official Record of Filed Complaint — Lupong Tagapamayapa</div>
+  </div>
+  <div class="control-row">
+    <span>Control No.: <strong><?= e($control_no) ?></strong></span>
+    <span>Record ID: <strong><?= e($doc_number) ?></strong></span>
+    <span>Date Filed: <strong><?= substr($record['date_submitted'],0,10) ?></strong></span>
+    <span>Status: <strong><?= e($status) ?></strong></span>
+  </div>
+  <div class="details-box">
+    <table>
+      <tr><td>Complainant</td><td><?= e($record['name']) ?></td></tr>
+      <tr><td>Address</td><td><?= e($record['address']) ?></td></tr>
+      <tr><td>Contact No.</td><td><?= e($record['contact']) ?></td></tr>
+      <tr><td>Resident ID</td><td><?= e($record['res_id']??$record['resident_id']) ?></td></tr>
+      <tr><td>Nature of Complaint</td><td><?= e($category) ?></td></tr>
+      <tr><td>Details / Description</td><td style="white-space:pre-wrap;line-height:1.6;"><?= e($record['details']??'—') ?></td></tr>
+      <tr><td>Resolution Status</td><td><strong><?= e($status) ?></strong></td></tr>
+    </table>
+  </div>
+  <div class="cert-line">
+    This certifies that the above complaint was duly filed and received by the Barangay San Rafael. The matter shall be referred to the <strong>Lupong Tagapamayapa</strong> for mediation and resolution in accordance with the Katarungang Pambarangay Law (RA 7160).
   </div>
 
-  <!-- Resident Information -->
-  <div class="section-header">I. Resident / Complainant Information</div>
-  <table class="detail-table">
-    <tr>
-      <td>Full Name</td>
-      <td><?= e($record['name']) ?></td>
-    </tr>
-    <tr>
-      <td>Resident ID</td>
-      <td><?= e($record['res_id'] ?? $record['resident_id']) ?></td>
-    </tr>
-    <tr>
-      <td>Address / Purok</td>
-      <td><?= e($record['address']) ?></td>
-    </tr>
-    <tr>
-      <td>Contact Number</td>
-      <td><?= e($record['contact']) ?></td>
-    </tr>
-  </table>
+  <?php else:
+    // ══════════════════════════════════════════════
+    // DOCUMENT REQUEST — category-specific body text
+    // ══════════════════════════════════════════════
+    $resident_name = strtoupper($record['name']);
+    $address       = $record['address'];
+    $purpose       = $record['details'] ?? 'general purposes';
 
-  <!-- Record Details -->
-  <div class="section-header">II. Record / <?= $type_label === 'COMPLAINT' ? 'Complaint' : 'Request' ?> Details</div>
-  <table class="detail-table">
-    <tr>
-      <td>Category / Concern</td>
-      <td><?= e($record['category']) ?></td>
-    </tr>
-    <tr>
-      <td>Description / Details</td>
-      <td style="min-height:80px;white-space:pre-wrap;"><?= e($record['details'] ?? 'No additional details provided.') ?></td>
-    </tr>
-    <tr>
-      <td>Date Submitted</td>
-      <td><?= e($record['date_submitted']) ?></td>
-    </tr>
-    <tr>
-      <td>Final Status</td>
-      <td><span class="status-box status-<?= e($record['status']) ?>"><?= e($record['status']) ?></span></td>
-    </tr>
-  </table>
+    // Body text per document type
+    $bodies = [
+      'Barangay Clearance' => "This is to certify that <span class='resident-name'>{$resident_name}</span>, of legal age, Filipino citizen, and a bonafide resident of <span class='highlight'>{$address}</span>, Barangay San Rafael, City of San Pablo, Laguna, is personally known to this Office and has no pending case, derogatory record, or adverse information filed with this Barangay.
+      <br><br>This clearance is issued upon the request of the interested party for <span class='highlight'>{$purpose}</span>, and for whatever legal purpose it may serve.",
 
-  <?php if ($is_deleted): ?>
-  <!-- Deletion Info -->
-  <div class="section-header" style="background:#dc3545;">III. Deletion Record</div>
-  <table class="detail-table">
-    <tr>
-      <td>Deleted By</td>
-      <td><?= e($record['deleted_by'] ?? '—') ?></td>
-    </tr>
-    <tr>
-      <td>Deleted At</td>
-      <td><?= e($record['deleted_at'] ?? '—') ?></td>
-    </tr>
-    <tr>
-      <td>Reason</td>
-      <td><?= e($record['delete_reason'] ?? '—') ?></td>
-    </tr>
-  </table>
+      'Certificate of Residency' => "This is to certify that <span class='resident-name'>{$resident_name}</span> is a bonafide resident of <span class='highlight'>{$address}</span>, Barangay San Rafael, City of San Pablo, Laguna, Philippines.
+      <br><br>This certification is issued upon the request of the interested party for <span class='highlight'>{$purpose}</span>, and for whatever legal purpose it may serve.",
+
+      'Certificate of Indigency' => "This is to certify that <span class='resident-name'>{$resident_name}</span>, a resident of <span class='highlight'>{$address}</span>, Barangay San Rafael, City of San Pablo, Laguna, belongs to the indigent sector of our community. The said person is known to be of low income and is in need of assistance.
+      <br><br>This certification is issued upon the request of the interested party for <span class='highlight'>{$purpose}</span>, and for whatever legal purpose it may serve.",
+
+      'Business Permit' => "This is to certify that the business establishment owned/operated by <span class='resident-name'>{$resident_name}</span>, located at <span class='highlight'>{$address}</span>, Barangay San Rafael, City of San Pablo, Laguna, has been duly inspected and found to be in compliance with the rules and regulations of this Barangay.
+      <br><br>This clearance is issued as a requirement for the issuance of the Mayor's Business Permit for <span class='highlight'>{$purpose}</span>.",
+
+      'Business Permit/Clearance' => "This is to certify that the business establishment owned/operated by <span class='resident-name'>{$resident_name}</span>, located at <span class='highlight'>{$address}</span>, Barangay San Rafael, City of San Pablo, Laguna, has been duly inspected and found to be in compliance with the rules and regulations of this Barangay.
+      <br><br>This clearance is issued as a requirement for the issuance of the Mayor's Business Permit for <span class='highlight'>{$purpose}</span>.",
+
+      'Barangay ID' => "This is to certify that <span class='resident-name'>{$resident_name}</span>, of legal age, Filipino citizen, is a bonafide resident of <span class='highlight'>{$address}</span>, Barangay San Rafael, City of San Pablo, Laguna.
+      <br><br>This identification document is issued for the purpose of establishing the identity of the above-named resident within the jurisdiction of Barangay San Rafael.",
+
+      'Community Tax Certificate (CEDULA)' => "This is to certify that <span class='resident-name'>{$resident_name}</span>, a resident of <span class='highlight'>{$address}</span>, Barangay San Rafael, City of San Pablo, Laguna, has paid the Community Tax for the year <span class='highlight'>".date('Y')."</span>.
+      <br><br>This certification is issued upon request for <span class='highlight'>{$purpose}</span>, and for whatever legal purpose it may serve.",
+    ];
+
+    $body_text = $bodies[$category] ?? "This is to certify that <span class='resident-name'>{$resident_name}</span>, of legal age, Filipino citizen, and a bonafide resident of <span class='highlight'>{$address}</span>, Barangay San Rafael, City of San Pablo, Laguna, has requested and been granted the barangay service/document described herein.
+    <br><br>This certification is issued upon the request of the interested party for <span class='highlight'>{$purpose}</span>, and for whatever legal purpose it may serve.";
+  ?>
+  <div class="rep-header">
+    <div class="rep-line">Republic of the Philippines</div>
+    <div class="rep-line">Province of Laguna · City of San Pablo</div>
+  </div>
+  <div class="logo-row">
+    <img src="/BarangayProject/Logo.jpg" alt="Logo">
+    <div class="brgy-info">
+      <div class="brgy-name">Barangay San Rafael</div>
+      <div class="brgy-city">City of San Pablo, Laguna</div>
+      <div class="brgy-office">Office of the Barangay Captain</div>
+    </div>
+  </div>
+  <hr class="hr-gold">
+  <div class="doc-title-box">
+    <div class="doc-title"><?= e($doc_title) ?></div>
+    <div class="doc-subtitle">Barangay San Rafael · City of San Pablo, Laguna</div>
+  </div>
+  <div class="control-row">
+    <span>Control No.: <strong><?= e($control_no) ?></strong></span>
+    <span>Record ID: <strong><?= e($doc_number) ?></strong></span>
+    <span>Date Issued: <strong><?= $print_date ?></strong></span>
+  </div>
+  <div class="doc-body">
+    <p class="salutation">TO WHOM IT MAY CONCERN:</p>
+    <p class="indent"><?= $body_text ?></p>
+  </div>
+  <div class="validity-box">
+    ⚠️ <strong>Validity:</strong> This document is valid for <strong>30 days</strong> from date of issue. Issued on <?= $print_date ?>.
+  </div>
   <?php endif; ?>
 
-  <!-- Signature Section -->
-  <div class="signature-section">
+  <!-- OR / Fee Box -->
+  <div class="or-box">
+    <div class="or-field"><span class="or-label">O.R. Number</span><span class="or-value">&nbsp;</span></div>
+    <div class="or-field"><span class="or-label">Amount Paid</span><span class="or-value">&nbsp;</span></div>
+    <div class="or-field"><span class="or-label">Date of Payment</span><span class="or-value">&nbsp;</span></div>
+    <div class="or-field"><span class="or-label">Received By</span><span class="or-value">&nbsp;</span></div>
+  </div>
+
+  <!-- Signatures -->
+  <div class="sig-section">
     <div class="sig-block">
       <div class="sig-line"></div>
       <div class="sig-name"><?= e($record['name']) ?></div>
-      <div class="sig-title">Resident / Complainant Signature</div>
+      <div class="sig-title">Signature of Requesting Party</div>
+      <div class="sig-title" style="margin-top:2px;">Date: _______________</div>
     </div>
     <div class="sig-block">
       <div class="sig-line"></div>
-      <div class="sig-name">Barangay Captain / Authorized Official</div>
-      <div class="sig-title">Signature over Printed Name</div>
+      <div class="sig-name">BARANGAY CAPTAIN / SECRETARY</div>
+      <div class="sig-title">Barangay San Rafael</div>
+      <div class="sig-stamp">OFFICIAL<br>DRY<br>SEAL</div>
     </div>
   </div>
 
-  <!-- Footer -->
+  <!-- Document Footer -->
   <div class="doc-footer">
     <div>
-      <small><strong>Printed by:</strong> <?= e($admin['full_name']) ?></small><br>
-      <small><strong>Date Printed:</strong> <?= $print_date ?> at <?= $print_time ?></small><br>
-      <small style="color:#bbb;">This is an official copy of record <?= e($doc_number) ?> from the Barangay Records Management System.</small>
+      <small><strong>Printed by:</strong> <?= e($admin['full_name']) ?> &nbsp;·&nbsp; <strong>Date:</strong> <?= $print_date ?> at <?= $print_time ?></small><br>
+      <small>Record No.: <?= e($doc_number) ?> &nbsp;·&nbsp; Barangay San Rafael Records Management System</small>
     </div>
-    <div class="qr-placeholder">QR<br>CODE<br>HERE</div>
+    <?php if(!$printable): ?>
+    <div class="not-valid-box">⚠ NOT VALID — Status: <?= e($status) ?></div>
+    <?php endif; ?>
   </div>
 
 </div>
 
 <script>
-// Auto-trigger print if ?print=1
-const params = new URLSearchParams(window.location.search);
-if (params.get('print') === '1') window.print();
+const params=new URLSearchParams(window.location.search);
+if(params.get('print')==='1' && <?= $printable?'true':'false' ?>) window.print();
 </script>
-</body>
-</html>
+</body></html>

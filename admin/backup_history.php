@@ -116,7 +116,7 @@ include __DIR__.'/../includes/admin_sidebar.php';
             ['Schedule','Daily (on logout)','bi-calendar-check','text-success'],
             ['Tables Backed Up','records, archives, residents, accounts, notifications + all others','bi-table','text-primary'],
             ['Retention','Last 30 days','bi-clock','text-warning'],
-            ['Triggers','Logout · Permanent Delete · Empty Trash · Manual','bi-lightning-charge','text-danger'],
+            ['Triggers','When logging out, deleting a record, or done manually.','bi-lightning-charge','text-danger'],
           ] as [$label,$val,$icon,$cls]): ?>
           <div class="col-md-6">
             <div class="d-flex align-items-start gap-3 p-3 rounded" style="background:#F8FAFF;border:1px solid var(--border);">

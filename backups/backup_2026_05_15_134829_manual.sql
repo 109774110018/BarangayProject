@@ -1,8 +1,8 @@
 -- ============================================================
 --  Barangay San Rafael — Database Backup
 --  Database : barangay_db
---  Generated: 2026-05-11 03:07:42
---  Trigger  : logout
+--  Generated: 2026-05-15 13:48:29
+--  Trigger  : manual
 --  Schedule : daily
 -- ============================================================
 
@@ -38,7 +38,8 @@ INSERT INTO `residents` VALUES
 ('B4083662', 'Julian Malolos', 'San Gregorio', '12132112'),
 ('RES-06D8EA', 'Lebrone', '0588, San Gregorio Homes', '38743897489'),
 ('RES-AABF6B', 'David Esteban', 'JoelTown', '982874434'),
-('RES-B430AE', 'lebb', 'purok 1 brgy V-B', '0928838282');
+('RES-B430AE', 'lebb', 'purok 1 brgy V-B', '0928838282'),
+('RES-DCC0B3', 'John', 'San Rafael', '09997867676');
 
 -- Table: `resident_accounts`
 DROP TABLE IF EXISTS `resident_accounts`;
@@ -55,12 +56,13 @@ CREATE TABLE `resident_accounts` (
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `resident_id` (`resident_id`),
   CONSTRAINT `resident_accounts_ibfk_1` FOREIGN KEY (`resident_id`) REFERENCES `residents` (`resident_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `resident_accounts` VALUES
 ('1', 'Julian', '$2y$10$gR21tj0n8FBqwHx0DzBsROocbC/aTLWwHpcxkkbRE9b1Ljoi6LtF2', 'Julian Malolos', 'San Gregorio', '12132112', 'B4083662', '2026-04-23 19:35:42'),
 ('3', 'leb', '123456789', 'lebb', 'purok 1 brgy V-B', '0928838282', 'RES-B430AE', '2026-04-28 12:38:35'),
-('4', 'SK Chairman', 'jthood123', 'David Esteban', 'JoelTown', '982874434', 'RES-AABF6B', '2026-04-29 12:45:30');
+('4', 'SK Chairman', 'jthood123', 'David Esteban', 'JoelTown', '982874434', 'RES-AABF6B', '2026-04-29 12:45:30'),
+('5', 'Konsehal', '$2y$10$gcauL55I36jwKMbwDYxPyO4oj1odGn6T7rjk810lALmy/F36T01qC', 'John', 'San Rafael', '09997867676', 'RES-DCC0B3', '2026-05-11 09:11:25');
 
 -- Table: `records`
 DROP TABLE IF EXISTS `records`;
@@ -82,16 +84,12 @@ CREATE TABLE `records` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `records` VALUES
-('CMP-0A4D6C', 'complaint', 'B4083662', 'Noise Complaint', 'urgent', 'Pending', '2026-05-07 13:41:20', '1', '2026-05-07 13:41:53', 'Barangay Captain', ''),
-('CMP-360D16', 'complaint', 'B4083662', 'Illegal Business', 'urgent', 'Done', '2026-04-30 18:12:51', '1', '2026-05-07 13:56:58', 'Barangay Captain', ''),
-('CMP-729FF5', 'complaint', 'B4083662', 'Illegal Construction', 's', 'Pending', '2026-05-04 20:05:11', '1', '2026-05-07 07:41:34', 'Barangay Captain', ''),
+('CMP-146790', 'complaint', 'B4083662', 'Garbage / Sanitation', 'Tagal kumuha ng basura!', 'Approved', '2026-05-14 09:30:25', '0', NULL, NULL, NULL),
+('CMP-23589C', 'complaint', 'RES-DCC0B3', 'Illegal Parking', 'Urgent', 'Pending', '2026-05-11 09:12:02', '0', NULL, NULL, NULL),
 ('CMP-F024B4', 'complaint', 'RES-AABF6B', 'Garbage / Sanitation', 'Ang kalat', 'Done', '2026-04-29 12:51:59', '0', NULL, NULL, NULL),
-('REQ-106196', 'request', 'B4083662', 'Community Tax Certificate (CEDULA)', '', 'Approved', '2026-05-07 13:55:29', '1', '2026-05-11 08:59:38', 'Barangay Captain', ''),
-('REQ-331DBD', 'request', 'B4083662', 'Business Permit', 'business', 'Done', '2026-04-30 18:13:07', '1', '2026-05-01 19:11:27', 'Barangay Captain', ''),
-('REQ-465E95', 'request', 'RES-AABF6B', 'Barangay ID', 'Urgent, for valid id', 'Done', '2026-04-29 12:52:20', '1', '2026-05-07 13:57:02', 'Barangay Captain', ''),
-('REQ-4909E1', 'request', 'B4083662', 'Certificate of Indigency', 'valid id', 'Pending', '2026-04-30 19:28:52', '1', '2026-05-01 19:11:21', 'Barangay Captain', ''),
+('REQ-2D0DBB', 'request', 'RES-DCC0B3', 'Business Permit', '', 'Pending', '2026-05-11 09:11:46', '0', NULL, NULL, NULL),
 ('REQ-5116F0', 'request', 'B4083662', 'Other Document', 'urgent', 'Approved', '2026-05-01 19:11:49', '0', NULL, NULL, NULL),
-('REQ-655E9B', 'request', 'B4083662', 'Other Document', 'd', 'Pending', '2026-05-04 20:04:54', '1', '2026-05-07 13:42:03', 'Barangay Captain', ''),
+('REQ-98F01D', 'request', 'B4083662', 'Certificate of Indigency', '', '', '2026-05-14 09:28:57', '0', NULL, NULL, NULL),
 ('REQ-BC798D', 'request', 'RES-B430AE', 'Community Tax Certificate (CEDULA)', 'need for business', 'Done', '2026-04-28 12:41:47', '0', NULL, NULL, NULL);
 
 -- Table: `notifications`
@@ -104,18 +102,16 @@ CREATE TABLE `notifications` (
   PRIMARY KEY (`id`),
   KEY `record_id` (`record_id`),
   CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`record_id`) REFERENCES `records` (`record_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `notifications` VALUES
 ('12', 'REQ-BC798D', 'Status updated to \'Approved\' by Barangay Captain on 2026-04-28 06:42', '2026-04-28 12:42:26'),
 ('13', 'REQ-BC798D', 'Status updated to \'Done\' by Barangay Captain on 2026-04-28 06:42', '2026-04-28 12:42:56'),
-('15', 'REQ-465E95', 'Status updated to \'Done\' by Barangay Captain on 2026-04-29 06:53', '2026-04-29 12:53:53'),
 ('16', 'CMP-F024B4', 'Status updated to \'Done\' by Barangay Captain on 2026-04-29 06:54', '2026-04-29 12:54:02'),
-('17', 'REQ-331DBD', 'Status updated to \'Done\' by Barangay Captain on 2026-04-30 12:13', '2026-04-30 18:13:53'),
-('18', 'CMP-360D16', 'Status updated to \'Done\' by Barangay Captain on 2026-04-30 12:13', '2026-04-30 18:13:58'),
-('19', 'REQ-106196', 'Status updated to \'Done\' by Barangay Captain on 2026-05-07 07:55', '2026-05-07 13:55:52'),
-('20', 'REQ-106196', 'Status updated to \'Approved\' by Barangay Captain on 2026-05-07 07:56', '2026-05-07 13:56:04'),
-('21', 'REQ-5116F0', 'Status updated to \'Approved\' by Barangay Captain on 2026-05-07 07:58', '2026-05-07 13:58:14');
+('21', 'REQ-5116F0', 'Status updated to \'Approved\' by Barangay Captain on 2026-05-07 07:58', '2026-05-07 13:58:14'),
+('22', 'CMP-146790', 'Status updated to \'Done\' by Barangay Captain on 2026-05-14 03:40', '2026-05-14 09:40:50'),
+('23', 'CMP-146790', 'Status updated to \'Approved\' by Barangay Captain on 2026-05-14 07:34', '2026-05-14 13:34:57'),
+('24', 'REQ-98F01D', 'Status updated to \'Rejected\' by Barangay Captain on 2026-05-14 07:38', '2026-05-14 13:38:56');
 
 -- Table: `archives`
 DROP TABLE IF EXISTS `archives`;
@@ -135,8 +131,17 @@ CREATE TABLE `archives` (
   `archived_at` datetime DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   UNIQUE KEY `record_id` (`record_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+INSERT INTO `archives` VALUES
+('1', 'CMP-0A4D6C', 'B4083662', 'Julian Malolos', '12132112', 'complaint', 'Noise Complaint', 'urgent', 'Pending', '2026-05-07 13:41:20', 'Barangay Captain', '', '2026-05-11 09:08:29'),
+('2', 'CMP-360D16', 'B4083662', 'Julian Malolos', '12132112', 'complaint', 'Illegal Business', 'urgent', 'Done', '2026-04-30 18:12:51', 'Barangay Captain', '', '2026-05-11 09:08:29'),
+('3', 'CMP-729FF5', 'B4083662', 'Julian Malolos', '12132112', 'complaint', 'Illegal Construction', 's', 'Pending', '2026-05-04 20:05:11', 'Barangay Captain', '', '2026-05-11 09:08:29'),
+('4', 'REQ-106196', 'B4083662', 'Julian Malolos', '12132112', 'request', 'Community Tax Certificate (CEDULA)', '', 'Approved', '2026-05-07 13:55:29', 'Barangay Captain', '', '2026-05-11 09:08:29'),
+('5', 'REQ-331DBD', 'B4083662', 'Julian Malolos', '12132112', 'request', 'Business Permit', 'business', 'Done', '2026-04-30 18:13:07', 'Barangay Captain', '', '2026-05-11 09:08:29'),
+('6', 'REQ-4909E1', 'B4083662', 'Julian Malolos', '12132112', 'request', 'Certificate of Indigency', 'valid id', 'Pending', '2026-04-30 19:28:52', 'Barangay Captain', '', '2026-05-11 09:08:29'),
+('7', 'REQ-655E9B', 'B4083662', 'Julian Malolos', '12132112', 'request', 'Other Document', 'd', 'Pending', '2026-05-04 20:04:54', 'Barangay Captain', '', '2026-05-11 09:08:29'),
+('8', 'REQ-465E95', 'RES-AABF6B', 'David Esteban', '982874434', 'request', 'Barangay ID', 'Urgent, for valid id', 'Done', '2026-04-29 12:52:20', 'Barangay Captain', '', '2026-05-11 09:08:29');
 
 -- Table: `backup_log`
 DROP TABLE IF EXISTS `backup_log`;

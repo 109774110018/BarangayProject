@@ -23,16 +23,19 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
 
 $type_f=$_GET['type']??'All'; $status_f=$_GET['status']??'All';
 $search=trim($_GET['q']??''); $page=max(1,(int)($_GET['page']??1));
+$date_from=trim($_GET['date_from']??''); $date_to=trim($_GET['date_to']??'');
 $sql='SELECT r.*,res.name,res.address,res.contact FROM records r JOIN residents res ON r.resident_id=res.resident_id WHERE r.is_deleted=0';
 $params=[];
-if ($type_f!=='All') { $sql.=' AND r.record_type=?'; $params[]=strtolower($type_f); }
-if ($status_f!=='All') { $sql.=' AND r.status=?'; $params[]=$status_f; }
-if ($search) { $sql.=' AND (r.record_id LIKE ? OR res.name LIKE ? OR r.category LIKE ?)'; $like="%{$search}%"; $params=array_merge($params,[$like,$like,$like]); }
+if ($type_f!=='All')  { $sql.=' AND r.record_type=?'; $params[]=strtolower($type_f); }
+if ($status_f!=='All'){ $sql.=' AND r.status=?'; $params[]=$status_f; }
+if ($search)          { $sql.=' AND (r.record_id LIKE ? OR res.name LIKE ? OR r.category LIKE ?)'; $like="%{$search}%"; $params=array_merge($params,[$like,$like,$like]); }
+if ($date_from)       { $sql.=' AND DATE(r.date_submitted) >= ?'; $params[]=$date_from; }
+if ($date_to)         { $sql.=' AND DATE(r.date_submitted) <= ?'; $params[]=$date_to; }
 $sql.=' ORDER BY r.date_submitted DESC';
 $all=db_fetch_all($sql,$params);
 $pg=paginate($all,PER_PAGE,$page);
 $records=$pg['items'];
-$base='?type='.urlencode($type_f).'&status='.urlencode($status_f).'&q='.urlencode($search);
+$base='?type='.urlencode($type_f).'&status='.urlencode($status_f).'&q='.urlencode($search).'&date_from='.urlencode($date_from).'&date_to='.urlencode($date_to);
 $trash_count=db_fetch_one('SELECT COUNT(*) c FROM records WHERE is_deleted=1')['c']??0;
 $flash=get_flash(); $page_title='Manage Records';
 include __DIR__.'/../includes/header.php';
@@ -76,7 +79,15 @@ include __DIR__.'/../includes/admin_sidebar.php';
             <?php foreach(['All','Pending','Approved','Done','Rejected'] as $o): ?><option <?= $status_f===$o?'selected':'' ?>><?= $o ?></option><?php endforeach; ?>
           </select>
         </div>
-        <div class="col-sm-auto col-12 d-flex gap-1">
+        <div class="col-sm-2 col-6">
+          <label class="form-label">Date From</label>
+          <input type="date" name="date_from" class="form-control form-control-sm" value="<?= e($date_from) ?>">
+        </div>
+        <div class="col-sm-2 col-6">
+          <label class="form-label">Date To</label>
+          <input type="date" name="date_to" class="form-control form-control-sm" value="<?= e($date_to) ?>">
+        </div>
+        <div class="col-sm-auto col-12 d-flex gap-1 align-items-end">
           <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-search me-1"></i>Filter</button>
           <a href="/BarangayProject/admin/manage_records.php" class="btn btn-outline-secondary btn-sm">Reset</a>
         </div>
@@ -85,7 +96,12 @@ include __DIR__.'/../includes/admin_sidebar.php';
     <!-- Table -->
     <div class="card">
       <div class="card-header">
-        <span><i class="bi bi-table me-2"></i>Records <?php if($search||$type_f!=='All'||$status_f!=='All'): ?><span class="badge bg-warning text-dark ms-1">Filtered</span><?php endif; ?></span>
+        <span><i class="bi bi-table me-2"></i>Records <?php if($search||$type_f!=='All'||$status_f!=='All'||$date_from||$date_to): ?>
+          <span class="badge bg-warning text-dark ms-1">Filtered</span>
+          <?php if($date_from||$date_to): ?>
+          <span class="badge bg-info text-dark ms-1"><i class="bi bi-calendar3 me-1"></i><?= $date_from?:'...' ?> → <?= $date_to?:'...' ?></span>
+          <?php endif; ?>
+          <?php endif; ?></span>
         <?= pagination_html($pg['pages'],$pg['current'],$base) ?>
       </div>
       <div class="card-body p-0">
